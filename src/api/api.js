@@ -3,7 +3,7 @@ import axios from "axios";
 // Usa la URL de producción (Railway) si existe la variable de entorno,
 // si no, usa localhost para cuando trabajes en tu computadora
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhmysql://root:yoeLFkyCogZdtTvBhIovXnPFzSDGITpT@reseau.proxy.rlwy.net:36605/railwayost:8000/api/",
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api/",
   headers: {
     "Content-Type": "application/json",
   },
