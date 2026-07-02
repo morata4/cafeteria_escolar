@@ -1,18 +1,23 @@
 """
 Django settings for backend project.
+Versión mejorada para producción (usa variables de entorno).
 """
 
+import os
 from pathlib import Path
+from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-y)dl)#&-9)m(ahlkvidm39^ass=h5j!(8b912_08lkh#4#xqr8'
+# =========================
+# SEGURIDAD
+# =========================
+SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
 
 
 # =========================
@@ -40,6 +45,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # 👈 IMPORTANTE ARRIBA
 
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # 👈 AGREGADO PARA ARCHIVOS ESTÁTICOS
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -78,11 +85,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'railway',
-        'USER': 'root',
-        'PASSWORD': 'yvymSYhuCQznifBwxthhJpSQbVTlJXPNT',
-        'HOST': 'acela.proxy.rlwy.net',
-        'PORT': '46435',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
 
@@ -99,12 +106,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # =========================
-# INTERNACIONALIZACIÓN (🔥 CORREGIDO)
+# INTERNACIONALIZACIÓN
 # =========================
-
 LANGUAGE_CODE = 'es-es'
 
-TIME_ZONE = 'America/Mexico_City'   # 👈 CAMBIA ESTO SI ERES DE OTRO PAÍS
+TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
 
@@ -115,6 +121,8 @@ USE_TZ = False
 # STATIC FILES
 # =========================
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 👈 CORREGIDO
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # =========================
@@ -126,4 +134,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # =========================
 # CORS
 # =========================
+# Activado temporalmente para permitir que tu Netlify se conecte sin bloqueos
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+# =========================
+# SEGURIDAD ADICIONAL (solo aplica cuando DEBUG=False)
+# =========================
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
